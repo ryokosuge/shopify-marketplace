@@ -14,7 +14,7 @@ type AdminShop {
   appHandle: String!
 }
 type Query {
-  shops: [Shop]
+  shops(nameIsLike: String): [Shop]
   adminShop: AdminShop
 }
 `;

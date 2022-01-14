@@ -1,7 +1,7 @@
 import Head from "next/head";
-import { AppBar, Container } from "@mui/material";
+import { AppBar, Container, Divider } from "@mui/material";
 
-const Page = ({ children }) => (
+const Page = ({ children, subHeader }) => (
   <>
     <Head>
       <link
@@ -14,6 +14,12 @@ const Page = ({ children }) => (
         <Container maxWidth="xl" disableGutters>
           <img src="/logo.svg" alt="Mockingbird" height={70} />
         </Container>
+        {subHeader && (
+          <>
+            <Divider />
+            {subHeader}
+          </>
+        )}
       </AppBar>
     </header>
     <main>

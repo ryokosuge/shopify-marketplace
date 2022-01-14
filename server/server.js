@@ -10,6 +10,7 @@ import { getCreateStorefrontAccessToken } from "./helpers";
 import { addShopData } from "./model/shop";
 import { ApolloServer } from "apollo-server-koa";
 import { resolvers, schema } from "./graphql";
+import { getShopDetails, setupWebhooks } from "./handlers";
 
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
@@ -30,10 +31,6 @@ Shopify.Context.initialize({
   SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),
 });
 
-// Storing the currently active shops in memory will force them to re-login when your server restarts. You should
-// persist this object in your app.
-const ACTIVE_SHOPIFY_SHOPS = {};
-
 app.prepare().then(async () => {
   const server = new Koa();
   const router = new Router();
@@ -43,34 +40,21 @@ app.prepare().then(async () => {
       accessMode: "offline",
       async afterAuth(ctx) {
         // Access token and shop available in ctx.state.shopify
-        const { shop, accessToken, scope } = ctx.state.shopify;
+        const { shop, accessToken } = ctx.state.shopify;
         const storefrontAccessToken = await getCreateStorefrontAccessToken(
           shop,
           accessToken
         );
+        const { name } = await getShopDetails(shop, accessToken);
         const shopData = {
           domain: shop,
           storefrontAccessToken,
+          name,
         };
         console.log(shopData);
         addShopData(shopData);
 
-        ACTIVE_SHOPIFY_SHOPS[shop] = scope;
-
-        const response = await Shopify.Webhooks.Registry.register({
-          shop,
-          accessToken,
-          path: "/webhooks",
-          topic: "APP_UNINSTALLED",
-          webhookHandler: async (topic, shop, body) =>
-            delete ACTIVE_SHOPIFY_SHOPS[shop],
-        });
-
-        if (!response.success) {
-          console.log(
-            `Failed to register APP_UNINSTALLED webhook: ${response.result}`
-          );
-        }
+        await setupWebhooks(shop, accessToken);
 
         const host = ctx.query.host;
         // Redirect to app with shop parameter upon auth

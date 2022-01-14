@@ -24,6 +24,7 @@
     "@babel/register": "^7.12.10",
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
+    "@mui/icons-material": "^5.2.5",
     "@mui/material": "^5.2.8",
     "@shopify/admin-graphql-api-utilities": "^1.0.5",
     "@shopify/app-bridge-react": "^2.0.2",

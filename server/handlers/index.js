@@ -7,8 +7,11 @@ import { createStorefrontAccessToken } from "./mutations/create-storefront-acces
 import { getStorefrontAccessToken } from "./queries/get-storefront-access-token";
 import { getPublicationId } from "./queries/get-publication-id";
 import { getAppHandle } from "./queries/get-app-handle";
+import { getShopDetails } from "./queries/get-shop-details";
 
 import { getProductListingsCount } from "./rest/get-product-listings-count";
+
+import { setupWebhooks } from "./webhooks/setup";
 
 export {
   createClient,
@@ -19,4 +22,6 @@ export {
   getAppHandle,
   createStorefrontAccessToken,
   getProductListingsCount,
+  getShopDetails,
+  setupWebhooks,
 };

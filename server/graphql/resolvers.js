@@ -3,8 +3,12 @@ import { getShop, getShops } from "../model/shop"
 
 export const resolvers = {
   Query: {
-    shops: async () => {
-      return getShops();
+    shops: async (_, args) => {
+      let shops = getShops();
+      if (args.nameIsLike) {
+        shops = shops.filter((shop) => shop.name.includes(args.nameIsLike));
+      }
+      return shops
     },
     adminShop: async (_, args, ctx) => {
       const { shop } = ctx;

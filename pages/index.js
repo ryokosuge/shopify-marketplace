@@ -1,9 +1,76 @@
 import ApolloClient, { gql, InMemoryCache } from "apollo-boost";
 import { useQuery } from "react-apollo";
 import { useEffect, useState } from "react";
-import { Stack, Typography, Link, Divider, Container } from "@mui/material";
+import { Stack, Typography, Link, Divider, Container, InputBase, alpha, styled } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { ProductGrid, Page } from "../components";
 
+const Search = styled("div")(({ theme }) => ({
+  position: "relative",
+  display: "block",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: 0,
+  width: "100%",
+  [theme.breakpoints.up("sm")]: {
+    marginLeft: theme.spacing(1),
+    width: "auto",
+  },
+}));
+
+const SearchIconWrapper = styled("div")(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: "100%",
+  position: "absolute",
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: "inherit",
+  "& .MuiInputBase-input": {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create("width"),
+    width: "100%",
+    height: "100%",
+    [theme.breakpoints.up("sm")]: {
+      width: "12ch",
+      "&:focus": {
+        width: "20ch",
+      },
+    },
+  },
+}));
+
+const SubHeader = ({ onSearchKeyDown }) => (
+  <Container
+    maxWidth="xl"
+    sx={{
+      pt: 2,
+      pb: 2,
+    }}
+  >
+    <Stack flexDirection="row" justifyContent="flex-end">
+      <Search>
+        <SearchIconWrapper>
+          <SearchIcon />
+        </SearchIconWrapper>
+        <StyledInputBase
+          placeholder="Search..."
+          inputProps={{ "aria-label": "search" }}
+          onKeyDown={onSearchKeyDown}
+        />
+      </Search>
+    </Stack>
+  </Container>
+);
 
 const SHOP_PRODUCTS_QUERY = gql`
   query ShopProducts {
@@ -154,8 +221,8 @@ const ShopsSection = ({ shops }) => {
 }
 
 const SHOPS_QUERY = gql`
-  query Shops {
-    shops {
+  query Shops($name: String) {
+    shops(nameIsLike: $name) {
       id
       domain
       storefrontAccessToken
@@ -164,10 +231,22 @@ const SHOPS_QUERY = gql`
 `;
 
 const Index = () => {
-  const { data } = useQuery(SHOPS_QUERY);
+  const [searchString, setSearchString] = useState("");
+  const { data } = useQuery(SHOPS_QUERY, {
+    variables: {
+      name: searchString || "",
+    },
+  });
+
+  const onSearchKeyDown = (e) => {
+    if (e.keyCode === 13) {
+      setSearchString(e.target.value)
+    }
+  };
+
   return (
-    <Page>
-      <Container maxWidth="xl">
+    <Page subHeader={<SubHeader onSearchKeyDown={onSearchKeyDown} />}>
+      <Container maxWidth="xl" sx={{ mt: "150px" }}>
         <ShopsSection shops={data?.shops} />
       </Container>
     </Page>
